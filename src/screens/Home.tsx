@@ -7,6 +7,7 @@ import { makeImagePath } from '../utils';
 
 const Wrapper = styled.div`
   background: black;
+  padding-bottom: 200px;
 `;
 
 const Loader = styled.div`
@@ -42,30 +43,32 @@ const Slider = styled.div`
   top: -100px;
 `;
 
+const GAP = 5;
 const Row = styled(motion.div)`
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  gap: ${GAP}px;
   position: absolute;
   width: 100%;
 `;
 
-const Box = styled(motion.div)`
+const Box = styled(motion.div)<{ bgPhoto: string }>`
   background-color: white;
+  background-image: url(${props => props.bgPhoto});
+  background-size: cover;
+  background-position: center center;
   height: 200px;
-  color: red;
-  font-size: 66px;
 `;
 
 const rowVariants = {
   hidden: {
-    x: window.outerWidth + 10,
+    x: window.outerWidth + GAP,
   },
   visible: {
     x: 0,
   },
   exit: {
-    x: -window.outerWidth - 10,
+    x: -window.outerWidth - GAP,
   },
 };
 
@@ -74,21 +77,30 @@ function Home() {
     ['movies', 'nowPlaying'],
     getMovies,
   );
+
   const bgPath = makeImagePath(data?.results[0].backdrop_path || '');
   const title = data?.results[0].title;
   const overview = data?.results[0].overview;
 
   const [rowIndex, setRowIndex] = useState(0);
-  const [isExiting, setIsExiting] = useState(false);
-  const boxPrinter = [1, 2, 3, 4, 5, 6];
+  const [isRowExiting, setIsRowExiting] = useState(false); // row animation flag
+
+  const offset = 6; // 한 row에 표시할 영화 수
+  const sliceBegin = offset * rowIndex;
+  const sliceEnd = offset * rowIndex + offset;
+  const rowMovies = data?.results.slice(1).slice(sliceBegin, sliceEnd); // banner 영화 제외
 
   const increaseRowIndex = () => {
-    if (isExiting) return;
-    toggleExiting();
-    setRowIndex(prev => prev + 1);
+    if (data) {
+      if (isRowExiting) return;
+      toggleRowExiting();
+      const allSliderMoviesLength = data.results.length - 1; // banner 영화 제외
+      const maxRowIndex = Math.floor(allSliderMoviesLength / offset) - 1; // page는 0부터 시작
+      setRowIndex(prev => (prev === maxRowIndex ? 0 : prev + 1));
+    }
   };
 
-  const toggleExiting = () => setIsExiting(prev => !prev);
+  const toggleRowExiting = () => setIsRowExiting(prev => !prev);
 
   return (
     <Wrapper>
@@ -101,7 +113,7 @@ function Home() {
             <Overview>{overview}</Overview>
           </Banner>
           <Slider>
-            <AnimatePresence onExitComplete={toggleExiting}>
+            <AnimatePresence initial={false} onExitComplete={toggleRowExiting}>
               <Row
                 key={rowIndex}
                 variants={rowVariants}
@@ -109,8 +121,11 @@ function Home() {
                 animate='visible'
                 transition={{ type: 'tween', duration: 1 }}
                 exit='exit'>
-                {boxPrinter.map(i => (
-                  <Box key={i}>{i}</Box>
+                {rowMovies?.map(movie => (
+                  <Box
+                    key={movie.id}
+                    bgPhoto={makeImagePath(movie.backdrop_path, 'w500')}
+                  />
                 ))}
               </Row>
             </AnimatePresence>
