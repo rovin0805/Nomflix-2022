@@ -52,12 +52,18 @@ const Row = styled(motion.div)`
   width: 100%;
 `;
 
-const Box = styled(motion.div)<{ bgPhoto: string }>`
+const Box = styled(motion.div)<{ bgPath: string }>`
   background-color: white;
-  background-image: url(${props => props.bgPhoto});
+  background-image: url(${props => props.bgPath});
   background-size: cover;
   background-position: center center;
   height: 200px;
+  &:first-child {
+    transform-origin: center left;
+  }
+  &:last-child {
+    transform-origin: center right;
+  }
 `;
 
 const rowVariants = {
@@ -69,6 +75,21 @@ const rowVariants = {
   },
   exit: {
     x: -window.outerWidth - GAP,
+  },
+};
+
+const boxVariants = {
+  narmal: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.3,
+    y: -50,
+    transition: {
+      delay: 0.3,
+      duration: 0.3,
+      type: 'tween',
+    },
   },
 };
 
@@ -121,12 +142,18 @@ function Home() {
                 animate='visible'
                 transition={{ type: 'tween', duration: 1 }}
                 exit='exit'>
-                {rowMovies?.map(movie => (
-                  <Box
-                    key={movie.id}
-                    bgPhoto={makeImagePath(movie.backdrop_path, 'w500')}
-                  />
-                ))}
+                {rowMovies?.map(movie => {
+                  return (
+                    <Box
+                      key={movie.id}
+                      bgPath={makeImagePath(movie.backdrop_path, 'w500')}
+                      variants={boxVariants}
+                      initial='normal'
+                      whileHover='hover'
+                      transition={{ type: 'tween' }}
+                    />
+                  );
+                })}
               </Row>
             </AnimatePresence>
           </Slider>
