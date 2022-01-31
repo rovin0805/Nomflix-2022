@@ -77,10 +77,18 @@ function Home() {
   const bgPath = makeImagePath(data?.results[0].backdrop_path || '');
   const title = data?.results[0].title;
   const overview = data?.results[0].overview;
+
   const [rowIndex, setRowIndex] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
   const boxPrinter = [1, 2, 3, 4, 5, 6];
 
-  const increaseRowIndex = () => setRowIndex(prev => prev + 1);
+  const increaseRowIndex = () => {
+    if (isExiting) return;
+    toggleExiting();
+    setRowIndex(prev => prev + 1);
+  };
+
+  const toggleExiting = () => setIsExiting(prev => !prev);
 
   return (
     <Wrapper>
@@ -93,7 +101,7 @@ function Home() {
             <Overview>{overview}</Overview>
           </Banner>
           <Slider>
-            <AnimatePresence>
+            <AnimatePresence onExitComplete={toggleExiting}>
               <Row
                 key={rowIndex}
                 variants={rowVariants}
