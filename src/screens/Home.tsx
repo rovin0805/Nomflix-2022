@@ -69,6 +69,18 @@ const Box = styled(motion.div)<{ bgPath: string }>`
   }
 `;
 
+const BoxInfo = styled(motion.div)`
+  padding: 10px;
+  background-color: ${props => props.theme.black.lighter};
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  h4 {
+    text-align: center;
+  }
+`;
+
 const rowVariants = {
   hidden: {
     x: window.outerWidth + GAP,
@@ -82,15 +94,26 @@ const rowVariants = {
 };
 
 const boxVariants = {
-  narmal: {
+  normal: {
     scale: 1,
   },
   hover: {
     scale: 1.3,
-    y: -50,
+    y: -80,
     transition: {
       delay: 0.3,
-      duration: 0.3,
+      duration: 0.2,
+      type: 'tween',
+    },
+  },
+};
+
+const boxInfoVariants = {
+  hover: {
+    opacity: 1,
+    transition: {
+      delay: 0.3,
+      duration: 0.2,
       type: 'tween',
     },
   },
@@ -156,8 +179,11 @@ function Home() {
                       variants={boxVariants}
                       initial='normal'
                       whileHover='hover'
-                      transition={{ type: 'tween' }}
-                    />
+                      transition={{ type: 'tween' }}>
+                      <BoxInfo variants={boxInfoVariants}>
+                        <h4>{movie.title}</h4>
+                      </BoxInfo>
+                    </Box>
                   );
                 })}
               </Row>
