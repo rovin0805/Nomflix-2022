@@ -5,6 +5,9 @@ import styled from 'styled-components';
 import { getMovies, IGetMovieResult } from '../api';
 import { makeImagePath } from '../utils';
 
+const NEXFLIX_LOGO_URL =
+  'https://assets.brand.microsites.netflix.io/assets/2800a67c-4252-11ec-a9ce-066b49664af6_cm_800w.jpg?v=4';
+
 const Wrapper = styled.div`
   background: black;
   padding-bottom: 200px;
@@ -143,10 +146,13 @@ function Home() {
                 transition={{ type: 'tween', duration: 1 }}
                 exit='exit'>
                 {rowMovies?.map(movie => {
+                  const backdropPath = movie.backdrop_path
+                    ? makeImagePath(movie.backdrop_path, 'w500')
+                    : NEXFLIX_LOGO_URL;
                   return (
                     <Box
                       key={movie.id}
-                      bgPath={makeImagePath(movie.backdrop_path, 'w500')}
+                      bgPath={backdropPath}
                       variants={boxVariants}
                       initial='normal'
                       whileHover='hover'
