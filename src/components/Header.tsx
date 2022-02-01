@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link, useRouteMatch } from 'react-router-dom';
+import { Link, useHistory, useRouteMatch } from 'react-router-dom';
 import { motion, useAnimation, useViewportScroll } from 'framer-motion';
 import styled from 'styled-components';
 import routes from '../routes';
+import { useForm } from 'react-hook-form';
 
 const Nav = styled(motion.nav)`
   display: flex;
@@ -62,7 +63,7 @@ const Circle = styled(motion.span)`
   background-color: ${props => props.theme.red};
 `;
 
-const Search = styled.span`
+const Search = styled.form`
   color: white;
   display: flex;
   align-items: center;
@@ -108,13 +109,21 @@ const navVariants = {
   },
 };
 
+interface IForm {
+  keyword: string;
+}
+
 function Header() {
   const homeMatch = useRouteMatch(routes.home);
   const tvMatch = useRouteMatch(routes.tv);
+
   const { scrollY } = useViewportScroll();
   const navAnimation = useAnimation();
   const inputAnimation = useAnimation();
   const [isSearchOpened, setIsSearchOpened] = useState(false);
+
+  const { register, handleSubmit } = useForm<IForm>();
+  const history = useHistory();
 
   useEffect(() => {
     scrollY.onChange(() => {
@@ -138,6 +147,9 @@ function Header() {
     }
     setIsSearchOpened(prev => !prev);
   };
+
+  const onValid = (data: IForm) =>
+    history.push(`/search?keyword=${data.keyword}`);
 
   return (
     <Nav variants={navVariants} initial='top' animate={navAnimation}>
@@ -164,7 +176,7 @@ function Header() {
         </Items>
       </Column>
       <Column>
-        <Search>
+        <Search onSubmit={handleSubmit(onValid)}>
           <motion.svg
             onClick={toggleSearch}
             animate={{ x: isSearchOpened ? -185 : 0 }}
@@ -178,6 +190,7 @@ function Header() {
               clipRule='evenodd'></path>
           </motion.svg>
           <SearchInput
+            {...register('keyword', { required: true, minLength: 2 })}
             placeholder='Search for Movie or TV'
             initial={{ scaleX: 0 }}
             animate={inputAnimation}
