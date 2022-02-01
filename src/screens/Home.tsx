@@ -4,6 +4,8 @@ import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import { getMovies, IGetMovieResult } from '../api';
 import { makeImagePath } from '../utils';
+import { useHistory, useRouteMatch } from 'react-router-dom';
+import routes from '../routes';
 
 const NEXFLIX_LOGO_URL =
   'https://assets.brand.microsites.netflix.io/assets/2800a67c-4252-11ec-a9ce-066b49664af6_cm_800w.jpg?v=4';
@@ -61,6 +63,7 @@ const Box = styled(motion.div)<{ bgPath: string }>`
   background-size: cover;
   background-position: center center;
   height: 200px;
+  cursor: pointer;
   &:first-child {
     transform-origin: center left;
   }
@@ -79,6 +82,26 @@ const BoxInfo = styled(motion.div)`
   h4 {
     text-align: center;
   }
+`;
+
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+`;
+
+const MovieDetailBox = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 80vh;
+  background-color: red;
+  top: 50px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
 `;
 
 const rowVariants = {
@@ -137,6 +160,11 @@ function Home() {
   const sliceEnd = offset * rowIndex + offset;
   const rowMovies = data?.results.slice(1).slice(sliceBegin, sliceEnd); // banner 영화 제외
 
+  const history = useHistory();
+  const movieDetailMatch = useRouteMatch<{ movieId: string }>(
+    routes.movieDetail,
+  );
+
   const increaseRowIndex = () => {
     if (data) {
       if (isRowExiting) return;
@@ -148,6 +176,10 @@ function Home() {
   };
 
   const toggleRowExiting = () => setIsRowExiting(prev => !prev);
+
+  const onClickBox = (movieId: number) => history.push(`/movies/${movieId}`);
+
+  const onClickOverlay = () => history.push(routes.home);
 
   return (
     <Wrapper>
@@ -174,12 +206,14 @@ function Home() {
                     : NEXFLIX_LOGO_URL;
                   return (
                     <Box
+                      layoutId={movie.id + ''}
                       key={movie.id}
                       bgPath={backdropPath}
                       variants={boxVariants}
                       initial='normal'
                       whileHover='hover'
-                      transition={{ type: 'tween' }}>
+                      transition={{ type: 'tween' }}
+                      onClick={() => onClickBox(movie.id)}>
                       <BoxInfo variants={boxInfoVariants}>
                         <h4>{movie.title}</h4>
                       </BoxInfo>
@@ -189,6 +223,14 @@ function Home() {
               </Row>
             </AnimatePresence>
           </Slider>
+          <AnimatePresence>
+            {movieDetailMatch ? (
+              <>
+                <Overlay onClick={onClickOverlay} animate={{ opacity: 1 }} />
+                <MovieDetailBox layoutId={movieDetailMatch.params.movieId} />
+              </>
+            ) : null}
+          </AnimatePresence>
         </>
       )}
     </Wrapper>
