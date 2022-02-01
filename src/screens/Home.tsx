@@ -100,13 +100,39 @@ const Overlay = styled(motion.div)`
 
 const MovieDetailBox = styled(motion.div)<{ scrollY: MotionValue<number> }>`
   position: absolute;
-  width: 40vw;
+  width: 60vw;
   height: 80vh;
-  background-color: red;
   top: ${props => props.scrollY.get() + 100}px;
   left: 0;
   right: 0;
   margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: ${props => props.theme.black.lighter};
+`;
+
+const MovieDetailCover = styled.div`
+  width: 100%;
+  height: 400px;
+  background-size: cover;
+  background-position: center center;
+`;
+
+const MovieDetailTitle = styled.h3`
+  color: ${props => props.theme.white.lighter};
+  padding: 20px;
+  font-size: 46px;
+  position: relative;
+  top: -80px;
+`;
+
+const MovieDetailOverview = styled.p`
+  padding: 0 20px;
+  position: relative;
+  top: -80px;
+  color: ${props => props.theme.white.lighter};
+  line-height: 28px;
+  font-size: 20px;
 `;
 
 const rowVariants = {
@@ -169,6 +195,9 @@ function Home() {
   const movieDetailMatch = useRouteMatch<{ movieId: string }>(
     routes.movieDetail,
   );
+  const clickedMovie =
+    movieDetailMatch?.params.movieId &&
+    data?.results.find(movie => movie.id === +movieDetailMatch.params.movieId);
 
   const { scrollY } = useViewportScroll();
 
@@ -240,8 +269,24 @@ function Home() {
                 />
                 <MovieDetailBox
                   layoutId={movieDetailMatch.params.movieId}
-                  scrollY={scrollY}
-                />
+                  scrollY={scrollY}>
+                  {clickedMovie && (
+                    <>
+                      <MovieDetailCover
+                        style={{
+                          backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
+                            clickedMovie.backdrop_path,
+                            'w500',
+                          )})`,
+                        }}
+                      />
+                      <MovieDetailTitle>{clickedMovie.title}</MovieDetailTitle>
+                      <MovieDetailOverview>
+                        {clickedMovie.overview}
+                      </MovieDetailOverview>
+                    </>
+                  )}
+                </MovieDetailBox>
               </>
             ) : null}
           </AnimatePresence>
