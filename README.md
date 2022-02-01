@@ -9,3 +9,10 @@
 - framer-motion
 - react-query
 - react-hook-form
+
+### TO-DO
+
+- complete search result & tv shows screens
+- add other sliders
+- add more styling & info
+- refactorying
