@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import {
+  AnimatePresence,
+  motion,
+  MotionValue,
+  useViewportScroll,
+} from 'framer-motion';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import { getMovies, IGetMovieResult } from '../api';
@@ -93,12 +98,12 @@ const Overlay = styled(motion.div)`
   opacity: 0;
 `;
 
-const MovieDetailBox = styled(motion.div)`
+const MovieDetailBox = styled(motion.div)<{ scrollY: MotionValue<number> }>`
   position: absolute;
   width: 40vw;
   height: 80vh;
   background-color: red;
-  top: 50px;
+  top: ${props => props.scrollY.get() + 100}px;
   left: 0;
   right: 0;
   margin: 0 auto;
@@ -165,6 +170,8 @@ function Home() {
     routes.movieDetail,
   );
 
+  const { scrollY } = useViewportScroll();
+
   const increaseRowIndex = () => {
     if (data) {
       if (isRowExiting) return;
@@ -226,8 +233,15 @@ function Home() {
           <AnimatePresence>
             {movieDetailMatch ? (
               <>
-                <Overlay onClick={onClickOverlay} animate={{ opacity: 1 }} />
-                <MovieDetailBox layoutId={movieDetailMatch.params.movieId} />
+                <Overlay
+                  onClick={onClickOverlay}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                />
+                <MovieDetailBox
+                  layoutId={movieDetailMatch.params.movieId}
+                  scrollY={scrollY}
+                />
               </>
             ) : null}
           </AnimatePresence>
